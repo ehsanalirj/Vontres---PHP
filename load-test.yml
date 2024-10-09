@@ -1,0 +1,21 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 60
+      arrivalRate: 20
+      rampTo: 100
+      name: "Ramping up the load"
+    - duration: 300
+      arrivalRate: 100
+      name: "Sustained load"
+
+scenarios:
+  - name: "API calls"
+    flow:
+      - get:
+          url: "/api/health"
+      - post:
+          url: "/api/auth/login"
+          json:
+            email: "test@example.com"
+            password: "password123"

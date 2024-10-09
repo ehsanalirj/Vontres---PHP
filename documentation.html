@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All-in-One AI-Powered CRM and Cold Calling System Documentation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        code {
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: block;
+            padding: 10px;
+            white-space: pre-wrap;
+        }
+        .note {
+            background-color: #e7f3fe;
+            border-left: 6px solid #2196F3;
+            margin-bottom: 15px;
+            padding: 4px 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>All-in-One AI-Powered CRM and Cold Calling System Documentation</h1>
+    
+    <h2>Table of Contents</h2>
+    <ol>
+        <li><a href="#introduction">Introduction</a></li>
+        <li><a href="#requirements">System Requirements</a></li>
+        <li><a href="#cpanel-installation">cPanel Installation</a></li>
+        <li><a href="#linux-installation">Linux/VPS Installation</a></li>
+        <li><a href="#configuration">Configuration</a></li>
+        <li><a href="#usage">Usage Guide</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+    </ol>
+
+    <h2 id="introduction">1. Introduction</h2>
+    <p>
+        Welcome to the All-in-One AI-Powered CRM and Cold Calling System. This comprehensive solution is designed for outsource companies, cold calling agencies, customer service agents, remote workers, and startups. It functions as a complete CRM with advanced AI-powered features for cold calling and customer management.
+    </p>
+
+    <h2 id="requirements">2. System Requirements</h2>
+    <ul>
+        <li>PHP 7.4 or higher</li>
+        <li>MySQL 5.7 or higher</li>
+        <li>Node.js 14.x or higher</li>
+        <li>npm 6.x or higher</li>
+        <li>Git</li>
+        <li>Composer</li>
+    </ul>
+
+    <h2 id="cpanel-installation">3. cPanel Installation</h2>
+    <ol>
+        <li>Log in to your cPanel account.</li>
+        <li>Navigate to the File Manager or use FTP to access your public_html directory.</li>
+        <li>Create a new directory for the CRM (e.g., 'crm') and navigate into it.</li>
+        <li>Upload the contents of the CRM system to this directory.</li>
+        <li>Create a new MySQL database and user through cPanel.</li>
+        <li>Open a terminal through SSH access and navigate to your CRM directory:
+            <code>cd /home/username/public_html/crm</code>
+        </li>
+        <li>Run the installation script:
+            <code>php artisan crm:install</code>
+        </li>
+        <li>Follow the prompts to enter your database details and other configuration options.</li>
+        <li>Once the installation is complete, set up a cron job in cPanel to run the following command every minute:
+            <code>* * * * * cd /home/username/public_html/crm && php artisan schedule:run >> /dev/null 2>&1</code>
+        </li>
+    </ol>
+
+    <h2 id="linux-installation">4. Linux/VPS Installation</h2>
+    <ol>
+        <li>Connect to your server via SSH.</li>
+        <li>Update your system:
+            <code>sudo apt update && sudo apt upgrade -y</code>
+        </li>
+        <li>Install required dependencies:
+            <code>sudo apt install git curl nginx mysql-server php-fpm php-mysql php-mbstring php-xml php-curl</code>
+        </li>
+        <li>Install Node.js and npm:
+            <code>
+curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+sudo apt install -y nodejs
+            </code>
+        </li>
+        <li>Install Composer:
+            <code>
+curl -sS https://getcomposer.org/installer | php
+sudo mv composer.phar /usr/local/bin/composer
+            </code>
+        </li>
+        <li>Clone the CRM repository:
+            <code>
+git clone https://github.com/your-repo/crm-system.git
+cd crm-system
+            </code>
+        </li>
+        <li>Install PHP dependencies:
+            <code>composer install</code>
+        </li>
+        <li>Install Node.js dependencies:
+            <code>npm install</code>
+        </li>
+        <li>Copy the example environment file and edit it with your settings:
+            <code>
+cp .env.example .env
+nano .env
+            </code>
+        </li>
+        <li>Generate an application key:
+            <code>php artisan key:generate</code>
+        </li>
+        <li>Run database migrations:
+            <code>php artisan migrate</code>
+        </li>
+        <li>Set up Nginx:
+            <code>
+sudo nano /etc/nginx/sites-available/crm
+            </code>
+            Add the following configuration (replace your_domain.com with your actual domain):
+            <code>
+server {
+    listen 80;
+    server_name your_domain.com;
+    root /var/www/crm-system/public;
+
+    add_header X-Frame-Options "SAMEORIGIN";
+    add_header X-Content-Type-Options "nosniff";
+
+    index index.php;
+
+    charset utf-8;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location = /robots.txt  { access_log off; log_not_found off; }
+
+    error_page 404 /index.php;
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+}
+            </code>
+        </li>
+        <li>Enable the Nginx configuration:
+            <code>
+sudo ln -s /etc/nginx/sites-available/crm /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl restart nginx
+            </code>
+        </li>
+        <li>Set up SSL with Let's Encrypt:
+            <code>
+sudo apt install certbot python3-certbot-nginx
+sudo certbot --nginx -d your_domain.com
+            </code>
+        </li>
+        <li>Set up a cron job to run scheduled tasks:
+            <code>
+crontab -e
+            </code>
+            Add the following line:
+            <code>
+* * * * * cd /path/to/crm-system && php artisan schedule:run >> /dev/null 2>&1
+            </code>
+        </li>
+    </ol>
+
+    <h2 id="configuration">5. Configuration</h2>
+    <p>After installation, you need to configure the following services:</p>
+    <ul>
+        <li>OpenAI API: Add your API key to the .env file.</li>
+        <li>Twilio: Add your Account SID, Auth Token, and phone number to the .env file.</li>
+        <li>Email: Configure your SMTP settings in the .env file for email notifications.</li>
+    </ul>
+
+    <h2 id="usage">6. Usage Guide</h2>
+    <ol>
+        <li>Access your CRM by navigating to your domain in a web browser.</li>
+        <li>Log in with the admin account created during installation.</li>
+        <li>Set up your company profile and add team members.</li>
+        <li>Import or add contacts to your CRM.</li>
+        <li>Use the AI-powered call script generator before making calls.</li>
+        <li>Make calls using the integrated VoIP system.</li>
+        <li>After each call, review the AI-generated analysis and suggestions.</li>
+        <li>Use the reporting tools to track performance and identify areas for improvement.</li>
+    </ol>
+
+    <h2 id="troubleshooting">7. Troubleshooting</h2>
+    <ul>
+        <li>If you encounter any issues, check the Laravel log file at storage/logs/laravel.log.</li>
+        <li>Ensure all required PHP extensions are installed and enabled.</li>
+        <li>Verify that your .env file contains the correct database and API credentials.</li>
+        <li>If you're having trouble with Nginx, check the error logs at /var/log/nginx/error.log.</li>
+    </ul>
+
+    <div class="note">
+        <p><strong>Note:</strong> For additional support or to report bugs, please open an issue on our GitHub repository or contact our support team at support@your-company.com.</p>
+    </div>
+</body>
+</html>
